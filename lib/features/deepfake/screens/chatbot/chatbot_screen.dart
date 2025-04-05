@@ -36,14 +36,32 @@ class MyApp extends StatelessWidget {
 
 class ChatMessage {
   final String text;
+  final String? fullText; // Full version of the text when shortened
   final bool isUser;
   final DateTime timestamp;
+  final bool isExpanded; // Track if the message is showing full text or shortened
 
   ChatMessage({
     required this.text,
+    this.fullText,
     required this.isUser,
     DateTime? timestamp,
+    this.isExpanded = false,
   }) : timestamp = timestamp ?? DateTime.now();
+
+  // Create a copy of the message with different expanded state
+  ChatMessage copyWith({bool? isExpanded}) {
+    return ChatMessage(
+      text: isExpanded == true ? (fullText ?? text) : text,
+      fullText: fullText,
+      isUser: isUser,
+      timestamp: timestamp,
+      isExpanded: isExpanded ?? this.isExpanded,
+    );
+  }
+
+  // Check if the message has a longer version available
+  bool get hasFullVersion => fullText != null && fullText != text;
 }
 
 class AnimatedBackground extends StatefulWidget {
@@ -209,6 +227,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
   // Keep track of conversation to maintain context
   final List<Map<String, String>> _conversationHistory = [];
 
+  // Maximum length for a bot message before shortening
+  final int _maxBotMessageLength = 150;
+
   // Suggested prompts related to deepfakes
   final List<String> _deepfakeSuggestions = [
     "How can I identify deepfake videos?",
@@ -276,6 +297,47 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
     }
   }
 
+  // Function to shorten bot message if it's too long
+  String _shortenMessage(String originalMessage) {
+    if (originalMessage.length <= _maxBotMessageLength) {
+      return originalMessage;
+    }
+
+    // Try to find a good breaking point (end of sentence)
+    final possibleBreakPoint = originalMessage.indexOf(
+      RegExp(r'[.!?]\s'),
+      _maxBotMessageLength ~/ 2,
+    );
+
+    if (possibleBreakPoint != -1 && possibleBreakPoint < _maxBotMessageLength) {
+      return originalMessage.substring(0, possibleBreakPoint + 1) +
+          "\n\n(Tap to read more...)";
+    }
+
+    // If no good breaking point, just cut at max length
+    return originalMessage.substring(0, _maxBotMessageLength) +
+        "...\n\n(Tap to read more...)";
+  }
+
+  // Toggle between shortened and full message
+  void _toggleMessageExpansion(int index) {
+    if (_messages[index].hasFullVersion) {
+      setState(() {
+        _messages[index] = _messages[index].copyWith(
+            isExpanded: !_messages[index].isExpanded
+        );
+      });
+      // Scroll after expanding to ensure message is visible
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+  }
+
   Future<void> _getResponseFromApi() async {
     try {
       // Using Google's Generative AI API (Gemini)
@@ -309,12 +371,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
           botResponse = "Received response but couldn't parse it: $e";
         }
 
-        // Add bot response to the conversation history
+        // Add bot response to the conversation history (always keep the full response in history)
         _conversationHistory.add({"role": "model", "content": botResponse});
+
+        // Create shortened version if needed
+        final String shortendResponse = _shortenMessage(botResponse);
+        final bool isShortened = shortendResponse != botResponse;
 
         setState(() {
           _messages.add(ChatMessage(
-            text: botResponse,
+            text: shortendResponse,
+            fullText: isShortened ? botResponse : null,
             isUser: false,
           ));
           _isTyping = false;
@@ -449,7 +516,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                         itemCount: _messages.length,
                         itemBuilder: (context, index) {
                           final message = _messages[index];
-                          return _buildMessage(message, isDarkMode);
+                          return _buildMessage(message, isDarkMode, index);
                         },
                       ),
                     ),
@@ -534,7 +601,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
     );
   }
 
-  Widget _buildMessage(ChatMessage message, bool isDarkMode) {
+  Widget _buildMessage(ChatMessage message, bool isDarkMode, int index) {
     final time = "${message.timestamp.hour.toString().padLeft(2, '0')}:${message.timestamp.minute.toString().padLeft(2, '0')}";
 
     return Container(
@@ -558,41 +625,60 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                   ? CrossAxisAlignment.end
                   : CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                  decoration: BoxDecoration(
-                    color: message.isUser
-                        ? TColors.primary
-                        : isDarkMode
-                        ? Colors.grey[800]!.withOpacity(0.9)
-                        : Colors.white.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(20.0).copyWith(
-                      bottomRight: message.isUser ? const Radius.circular(0) : null,
-                      bottomLeft: !message.isUser ? const Radius.circular(0) : null,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 3,
+                GestureDetector(
+                  onTap: message.isUser ? null : () => _toggleMessageExpansion(index),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                    decoration: BoxDecoration(
+                      color: message.isUser
+                          ? TColors.primary
+                          : isDarkMode
+                          ? Colors.grey[800]!.withOpacity(0.9)
+                          : Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(20.0).copyWith(
+                        bottomRight: message.isUser ? const Radius.circular(0) : null,
+                        bottomLeft: !message.isUser ? const Radius.circular(0) : null,
                       ),
-                    ],
-                  ),
-                  child: Text(
-                    message.text,
-                    style: TextStyle(
-                      color: message.isUser ? Colors.white : null,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          spreadRadius: 1,
+                          blurRadius: 3,
+                        ),
+                      ],
+                    ),
+                    child: Text(
+                      message.text,
+                      style: TextStyle(
+                        color: message.isUser ? Colors.white : null,
+                      ),
                     ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
-                  child: Text(
-                    time,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey[500],
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        time,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                      if (message.hasFullVersion) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          message.isExpanded ? "Show less" : "Read more",
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: TColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
@@ -698,5 +784,3 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
     super.dispose();
   }
 }
-
-// Missing imports that need to be added to this file
