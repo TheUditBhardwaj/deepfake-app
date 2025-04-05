@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -13,9 +12,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _sequenceLength = 10; // Default sequence length
   int _maxFrames = 100; // Example maximum frame length for the video (can be dynamic)
   List<Map<String, String>> recentDetections = [
-    {"status": "FAKE", "image": "assets/images/sample1.jpg"},
-    {"status": "REAL", "image": "assets/images/sample2.jpg"},
-    {"status": "FAKE", "image": "assets/images/sample3.jpg"},
+    {"status": "FAKE", "image": "assets/images/recent_detections/Rectangle_6.png"},
+    {"status": "REAL", "image": "assets/images/recent_detections/Rectangle_6.png"},
+    {"status": "FAKE", "image": "assets/images/recent_detections/Rectangle_6.png"},
   ];
 
   // Function to pick a video from gallery
@@ -34,10 +33,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.teal,
         title: Text(
           'Hi, Sophia\nLive Deep Fake Detect',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
         ),
         centerTitle: false,
       ),
@@ -49,9 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Video section
               Card(
-                elevation: 5,
+                elevation: 10,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(15),
                 ),
                 margin: EdgeInsets.symmetric(vertical: 10),
                 child: Padding(
@@ -64,30 +63,38 @@ class _HomeScreenState extends State<HomeScreen> {
                         'Picked Video: ${_pickedVideo!.name}',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 15),
                       // Video player widget or thumbnail for preview
-                      Container(
-                        height: 200,
+                      AnimatedContainer(
+                        duration: Duration(seconds: 1),
+                        height: 250,
                         width: double.infinity,
-                        color: Colors.grey[300],
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                         child: Icon(
                           Icons.play_arrow,
-                          size: 60,
-                          color: Colors.black,
+                          size: 80,
+                          color: Colors.teal,
                         ),
                       ),
                     ],
                   )
                       : Column(
                     children: [
-                      Container(
-                        height: 200,
+                      AnimatedContainer(
+                        duration: Duration(seconds: 1),
+                        height: 250,
                         width: double.infinity,
-                        color: Colors.grey[300],
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                         child: Icon(
                           Icons.video_collection,
                           size: 100,
-                          color: Colors.black,
+                          color: Colors.teal,
                         ),
                       ),
                       SizedBox(height: 10),
@@ -103,18 +110,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
               // Upload button with elevation and rounded edges
               Center(
-                child: ElevatedButton(
-                  onPressed: _pickVideo,
-                  child: Text(
-                    'Upload Video',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                child: AnimatedContainer(
+                  duration: Duration(seconds: 1),
+                  padding: EdgeInsets.symmetric(horizontal: 60, vertical: 20),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.teal, Colors.green],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.teal.withOpacity(0.6),
+                        spreadRadius: 2,
+                        blurRadius: 8,
+                        offset: Offset(0, 3), // Shadow position
+                      ),
+                    ],
                   ),
-                  style: ButtonStyle(
-                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 50, vertical: 16)),
-                    backgroundColor: MaterialStateProperty.all(Colors.green),
-                    shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    )),
+                  child: ElevatedButton(
+                    onPressed: _pickVideo,
+                    child: Text(
+                      'Upload Video',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    ),
+                    style: ButtonStyle(
+                      padding: MaterialStateProperty.all(EdgeInsets.all(0)),
+                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                      shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      )),
+                    ),
                   ),
                 ),
               ),
@@ -125,23 +152,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 'Sequence Length: $_sequenceLength frames',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              Slider(
-                min: 10,
-                max: _maxFrames.toDouble(),
-                value: _sequenceLength.toDouble(),
-                onChanged: (value) {
-                  setState(() {
-                    _sequenceLength = value.toInt();
-                  });
-                },
+              AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                child: Slider(
+                  min: 10,
+                  max: _maxFrames.toDouble(),
+                  value: _sequenceLength.toDouble(),
+                  onChanged: (value) {
+                    setState(() {
+                      _sequenceLength = value.toInt();
+                    });
+                  },
+                ),
               ),
               SizedBox(height: 10),
 
-              // Disclaimer Text
-              Text(
-                'Note: More frames result in higher accuracy, while fewer frames may reduce accuracy.',
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                textAlign: TextAlign.center,
+              // Disclaimer Text with animated fade-in
+              AnimatedOpacity(
+                opacity: 1.0,
+                duration: Duration(milliseconds: 500),
+                child: Text(
+                  'Disclaimer: Longer sequence lengths may enhance prediction accuracy but could increase processing time. '
+                      'Shorter sequences offer faster results with a potential trade-off in accuracy.',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  textAlign: TextAlign.center,
+                ),
               ),
               SizedBox(height: 30),
 
@@ -153,45 +188,36 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 10),
               // Horizontal list of recent detections
               Container(
-                height: 180,
+                height: 200,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: recentDetections.length,
                   itemBuilder: (context, index) {
-                    return Card(
-                      elevation: 3,
+                    return AnimatedContainer(
+                      duration: Duration(seconds: 1),
                       margin: EdgeInsets.symmetric(horizontal: 8),
-                      shape: RoundedRectangleBorder(
+                      decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
+                        color: Colors.grey[200],
                       ),
-                      child: Container(
-                        width: 140,
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.grey[200],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: 100,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                image: DecorationImage(
-                                  image: AssetImage(recentDetections[index]['image']!),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.asset(
+                              recentDetections[index]['image']!,
+                              height: 130,
+                              width: 180,
+                              fit: BoxFit.cover,
                             ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Image $index - ${recentDetections[index]['status']}',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            'Image $index - ${recentDetections[index]['status']}',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          ),
+                        ],
                       ),
                     );
                   },

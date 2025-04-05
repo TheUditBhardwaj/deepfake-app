@@ -93,6 +93,8 @@ flutter:
     - assets/images/banners/
     - assets/images/reviews/
     - assets/images/products/
+    - assets/images/selection_menu/
+    - assets/images/recent_detections/
     - assets/images/animations/
     - assets/images/on_boarding_images/
     - assets/icons/brands/
