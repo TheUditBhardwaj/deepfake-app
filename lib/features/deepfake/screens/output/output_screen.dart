@@ -3,50 +3,58 @@ import 'package:flutter/material.dart';
 
 import '../../../../utils/constants/colors.dart';
 
-class ProcessingScreen extends StatefulWidget {
-  @override
-  _ProcessingScreenState createState() => _ProcessingScreenState();
-}
 
-class _ProcessingScreenState extends State<ProcessingScreen> {
-  @override
-  void initState() {
-    super.initState();
 
-    // Simulate a processing delay before showing results (e.g., 3 seconds)
-    Future.delayed(Duration(seconds: 3), () {
-      // Once processing is complete, navigate to results screen
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => ResultsScreen()), // Navigate to the results screen after processing
-      );
-    });
-  }
-
+class ProcessingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Processing Video'),
-        backgroundColor: TColors.primary,
+        backgroundColor: Colors.black,
+        elevation: 0,
+        title: Text(
+          'PROCESSING',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            letterSpacing: 1,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Animated GIF placeholder
-            Image.asset(
-              'assets/images/animations/cofee.gif', // Replace with your own GIF image path
-              height: 150, // Adjust height of the gif as per need
-              width: 150, // Adjust width of the gif as per need
+            SizedBox(
+              height: 60,
+              width: 60,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFE0E0E0)), // Light gray
+                strokeWidth: 2,
+              ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 30),
             Text(
-              'Processing the video...',
+              'ANALYZING VIDEO',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: TColors.primary,
+                color: Colors.white,
+                letterSpacing: 1.5,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'This may take a few moments',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFFBDBDBD), // Light gray
               ),
             ),
           ],
