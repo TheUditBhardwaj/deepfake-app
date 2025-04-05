@@ -5,6 +5,7 @@ import 'package:hacachino/utils/constants/colors.dart';
 import 'package:hacachino/utils/helpers/helper_functions.dart';
 import 'package:iconsax/iconsax.dart';
 
+import 'features/deepfake/screens/chatbot/chatbot_screen.dart';
 import 'features/personalization/screens/settings/settings.dart';
 
 // Root navigation menu with bottom navigation
@@ -60,6 +61,7 @@ class NavigationController extends GetxController {
   // List of screens to be displayed based on the selected tab
   final screens = [
     HomeScreen(),
+    ChatbotScreen(),
     // CarHomeScreen(),  // First screen: CarHomeScreen for "Home"
     // TripsScreen(),
     // NotificationsScreen(),
