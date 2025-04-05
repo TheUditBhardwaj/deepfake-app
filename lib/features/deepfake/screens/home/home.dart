@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../data/repositories/user/user_repository.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../authentication/models/user_model.dart';
+import '../output/output_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -351,18 +352,3 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 }
 
-// Placeholder ProcessingScreen for the next screen after video send
-class ProcessingScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Processing Video'),
-        backgroundColor: TColors.primary,
-      ),
-      body: Center(
-        child: Text('Processing the video...'),
-      ),
-    );
-  }
-}

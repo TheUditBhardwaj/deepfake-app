@@ -6,6 +6,7 @@ import 'package:hacachino/utils/helpers/helper_functions.dart';
 import 'package:iconsax/iconsax.dart';
 
 import 'features/deepfake/screens/chatbot/chatbot_screen.dart';
+import 'features/deepfake/screens/live/live_detect.dart';
 import 'features/personalization/screens/settings/settings.dart';
 
 // Root navigation menu with bottom navigation
@@ -38,8 +39,8 @@ class NavigationMenu extends StatelessWidget {
               label: 'Chat bot',
             ),
             NavigationDestination(
-              icon: Icon(Iconsax.attach_circle, size: 30),
-              label: 'Articles',
+              icon: Icon(Iconsax.camera, size: 30),
+              label: 'Live',
             ),
             NavigationDestination(
               icon: Icon(Iconsax.user, size: 30),
@@ -62,9 +63,7 @@ class NavigationController extends GetxController {
   final screens = [
     HomeScreen(),
     ChatbotScreen(),
-    // CarHomeScreen(),  // First screen: CarHomeScreen for "Home"
-    // TripsScreen(),
-    // NotificationsScreen(),
+    LiveDeepfakeDetectionScreen(),
     SettingsScreen(),
   ];
 }

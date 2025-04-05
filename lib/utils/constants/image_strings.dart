@@ -25,9 +25,9 @@ class TImages {
   static String loaderAnimation = "assets/images/animations/loader-animation.json";
 
   // OnBoarding Images
-  static const String onBoardingImage1 = "assets/images/on_boarding_images/Rectangle.png";
-  static const String onBoardingImage2 = "assets/images/on_boarding_images/Rectangle_2.png";
-  static const String onBoardingImage3 = "assets/images/on_boarding_images/Rectangle_3.png";
+  static const String onBoardingImage1 = "assets/images/on_boarding_images/dete.png";
+  static const String onBoardingImage2 = "assets/images/on_boarding_images/ai.png";
+  static const String onBoardingImage3 = "assets/images/on_boarding_images/shield.png";
 
   // Animations
   static const String products_Illustration = "assets/images/animations/Fast_Shopping_Delivery.giff";

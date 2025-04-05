@@ -7,9 +7,9 @@ class TTexts {
   static const String onBoardingTitle2 = "🧠 AI vs AI: The Battle \nBegins";
   static const String onBoardingTitle3 = "Unlock Your Learning Potential";
 
-  static const String onBoardingSubTitle1 = "Welcome to a World of Limitless Choices - Your Perfect Product Awaits!";
-  static const String onBoardingSubTitle2 = "For Seamless Transactions, Choose Your Payment Path - Your Convenience, Our Priority!";
-  static const String onBoardingSubTitle3 = "From Our Doorstep to Yours - Swift, Secure, and Contactless Delivery!";
+  static const String onBoardingSubTitle1 = "Protect yourself from manipulated media. Our AI detects deepfakes in seconds.";
+  static const String onBoardingSubTitle2 = "We use advanced AI Model to fight deepfake deception—real-time, reliable, revolutionary.";
+  static const String onBoardingSubTitle3 = "Deepfakes are getting smarter. So are we. Stay one step ahead with cutting-edge detection.";
 
   // -- Home
   static const String homeAppbarTitle = "Good day for shopping";
