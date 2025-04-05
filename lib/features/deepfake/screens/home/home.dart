@@ -162,6 +162,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_videoController != null) {
       if (_videoController!.value.isPlaying) {
         _videoController!.pause();
+
       } else {
         _videoController!.play();
       }
@@ -717,12 +718,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         ),
         SizedBox(height: 12),
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             _buildFeatureTag('Facial movements'),
-            SizedBox(width: 8),
+            SizedBox(width: 5),
             _buildFeatureTag('Audio sync'),
-            SizedBox(width: 8),
+            SizedBox(width: 5),
             _buildFeatureTag('Artifacts'),
           ],
         ),
@@ -859,7 +860,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     );
                   },
                   child: Container(
-                    width: 210,
+                    width: 190,
                     margin: EdgeInsets.only(right: 16),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -933,7 +934,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ],
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: const EdgeInsets.all(6.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -980,7 +981,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   color: Colors.white.withOpacity(0.9),
                                 ),
                               ),
-                              SizedBox(height: 4),
+                              // SizedBox(height: 4),
                               Text(
                                 'Tap to view full analysis and report',
                                 style: TextStyle(
