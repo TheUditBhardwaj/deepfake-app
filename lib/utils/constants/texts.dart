@@ -3,7 +3,7 @@ class TTexts {
   // -- GLOBAL Texts
 
   // -- OnBoarding Texts
-  static const String onBoardingTitle1 = "Empower Your \nMind with Us";
+  static const String onBoardingTitle1 = "🔍 Spot the Fake,\n Trust the Real";
   static const String onBoardingTitle2 = "Discover Your Path to Knowledge";
   static const String onBoardingTitle3 = "Unlock Your Learning Potential";
 
