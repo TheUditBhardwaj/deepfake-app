@@ -2,12 +2,13 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hacachino/features/deepfake/screens/home/widgets/animated_particles.dart';
+import 'package:hacachino/features/deepfake/screens/home/widgets/recent_detections.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../data/repositories/user/user_repository.dart';
-import '../../../../utils/constants/colors.dart';
 import '../../../authentication/models/user_model.dart';
 import '../output/output_screen.dart';
 
@@ -29,26 +30,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _cardAnimationController;
 
   // List for animated background particles
-  final List<_AnimatedParticle> _particles = [];
+  final List<AnimatedParticle> _particles = [];
   final int _particleCount = 20;
 
-  List<Map<String, dynamic>> recentDetections = [
-    {
-      "status": "FAKE",
-      "image": "assets/images/recent_detections/Rectangle_6.png",
-      "date": "2 hours ago"
-    },
-    {
-      "status": "REAL",
-      "image": "assets/images/recent_detections/Rectangle_6.png",
-      "date": "Yesterday"
-    },
-    {
-      "status": "FAKE",
-      "image": "assets/images/recent_detections/Rectangle_6.png",
-      "date": "3 days ago"
-    },
-  ];
 
   // Function to pick a video from gallery
   Future<void> _pickVideo() async {
@@ -100,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void _initParticles() {
     _particles.clear();
     for (int i = 0; i < _particleCount; i++) {
-      _particles.add(_AnimatedParticle(
+      _particles.add(AnimatedParticle(
         position: Offset(
           math.Random().nextDouble() * MediaQuery.of(context).size.width,
           math.Random().nextDouble() * MediaQuery.of(context).size.height,
@@ -330,7 +314,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
             child: CustomPaint(
-              painter: _ParticlesPainter(_particles),
+              painter: ParticlesPainter(_particles),
               child: Container(),
             ),
           ),
@@ -356,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   SizedBox(height: 40),
 
                   // Recent detections section
-                  _buildRecentDetections(),
+                  buildRecentDetections(),
                 ],
               ),
             ),
@@ -709,330 +693,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            _buildFeatureTag('Facial movements'),
-            SizedBox(width: 5),
-            _buildFeatureTag('Audio sync'),
-            SizedBox(width: 5),
-            _buildFeatureTag('Artifacts'),
-          ],
-        ),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.start,
+        //   children: [
+        //     // _buildFeatureTag('Facial movements'),
+        //     SizedBox(width: 5),
+        //     // _buildFeatureTag('Audio sync'),
+        //     SizedBox(width: 5),
+        //     // _buildFeatureTag('Artifacts'),
+        //   ],
+        // ),
       ],
     );
   }
 
-  Widget _buildFeatureTag(String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.1),
-          width: 1,
-        ),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 12,
-          color: Colors.grey[300],
-        ),
-      ),
-    );
-  }
+  // Widget _buildFeatureTag(String text) {
+  //   return Container(
+  //     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white.withOpacity(0.05),
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(
+  //         color: Colors.white.withOpacity(0.1),
+  //         width: 1,
+  //       ),
+  //     ),
+  //     child: Text(
+  //       text,
+  //       style: TextStyle(
+  //         fontSize: 12,
+  //         color: Colors.grey[300],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _buildRecentDetections() {
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 1000),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Transform.translate(
-          offset: Offset(0, 60 * (1 - value)),
-          child: Opacity(
-            opacity: value,
-            child: child,
-          ),
-        );
-      },
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Colors.purple.shade700, Colors.purple.shade900],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.purple.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Icon(Icons.history, color: Colors.white, size: 18),
-                  ),
-                  SizedBox(width: 12),
-                  Text(
-                    'RECENT DETECTIONS',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ],
-              ),
-              TextButton(
-                onPressed: () {
-                  HapticFeedback.lightImpact();
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.white.withOpacity(0.05),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      'VIEW ALL',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue[400],
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    Icon(Icons.chevron_right, color: Colors.blue[400], size: 16),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 20),
-          Container(
-            height: 240,
-            child: ListView.builder(
-              physics: BouncingScrollPhysics(),
-              scrollDirection: Axis.horizontal,
-              itemCount: recentDetections.length,
-              itemBuilder: (context, index) {
-                final status = recentDetections[index]['status']!;
-                final statusColor = status == 'FAKE' ? Colors.redAccent : Colors.greenAccent;
-                final statusBgColor = status == 'FAKE'
-                    ? Colors.redAccent.withOpacity(0.15)
-                    : Colors.greenAccent.withOpacity(0.15);
-
-                return TweenAnimationBuilder<double>(
-                  tween: Tween<double>(begin: 0.0, end: 1.0),
-                  duration: Duration(milliseconds: 1200 + (index * 200)),
-                  curve: Curves.easeOutQuint,
-                  builder: (context, value, child) {
-                    return Transform.translate(
-                      offset: Offset(100 * (1 - value), 0),
-                      child: Opacity(
-                        opacity: value,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Container(
-                    width: 190,
-                    margin: EdgeInsets.only(right: 16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF303030), Color(0xFF1a1a1a)],
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.5),
-                          blurRadius: 15,
-                          offset: Offset(0, 8),
-                        ),
-                        BoxShadow(
-                          color: status == 'FAKE'
-                              ? Colors.red.withOpacity(0.1)
-                              : Colors.green.withOpacity(0.1),
-                          blurRadius: 20,
-                          offset: Offset(0, 0),
-                        ),
-                      ],
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.03),
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(24),
-                                topRight: Radius.circular(24),
-                              ),
-                              child: Container(
-                                height: 140,
-                                width: 210,
-                                color: Color(0xFF424242),
-                                child: Image.asset(
-                                  recentDetections[index]['image']!,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 10,
-                              right: 10,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.7),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.1),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  recentDetections[index]['date']!,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: statusBgColor,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                        color: statusColor.withOpacity(0.3),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Icon(
-                                          status == 'FAKE' ? Icons.warning_amber_rounded : Icons.check_circle_outline,
-                                          color: statusColor,
-                                          size: 14,
-                                        ),
-                                        SizedBox(width: 4),
-                                        Text(
-                                          status,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: statusColor,
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                'Detection details',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withOpacity(0.9),
-                                ),
-                              ),
-                              // SizedBox(height: 4),
-                              Text(
-                                'Tap to view full analysis and report',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[400],
-                                ),
-                              ),
-                              // SizedBox(height: 4),
-
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AnimatedParticle {
-  Offset position;
-  final double size;
-  final double speed;
-  final Color color;
-
-  _AnimatedParticle({
-    required this.position,
-    required this.size,
-    required this.speed,
-    required this.color,
-  });
-}
-
-
-class _ParticlesPainter extends CustomPainter {
-  final List<_AnimatedParticle> particles;
-
-  _ParticlesPainter(this.particles);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint();
-
-    for (var particle in particles) {
-      paint.color = particle.color;
-      canvas.drawCircle(particle.position, particle.size, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
 }
 
 
