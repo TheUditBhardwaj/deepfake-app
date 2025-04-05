@@ -33,16 +33,16 @@ class NavigationMenu extends StatelessWidget {
               label: 'Home',
             ),
             NavigationDestination(
-              icon: Icon(Iconsax.car, size: 30),
-              label: 'Trips',
+              icon: Icon(Iconsax.airdrop, size: 30),
+              label: 'Chat bot',
             ),
             NavigationDestination(
-              icon: Icon(Iconsax.notification, size: 30),
-              label: 'Notifications',
+              icon: Icon(Iconsax.attach_circle, size: 30),
+              label: 'Articles',
             ),
             NavigationDestination(
               icon: Icon(Iconsax.user, size: 30),
-              label: 'Profile',
+              label: 'Settings',
             ),
           ],
         );
