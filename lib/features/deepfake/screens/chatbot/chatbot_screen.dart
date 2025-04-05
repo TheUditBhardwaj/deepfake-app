@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hacachino/utils/constants/colors.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       home: const ChatbotScreen(),
+
     );
   }
 }
@@ -279,7 +281,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
         children: [
           if (!message.isUser) ...[
             CircleAvatar(
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: TColors.primary,
               child: const Text('AI', style: TextStyle(color: Colors.white, fontSize: 12)),
             ),
             const SizedBox(width: 8.0),
@@ -294,7 +296,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   decoration: BoxDecoration(
                     color: message.isUser
-                        ? Theme.of(context).primaryColor.withOpacity(0.8)
+                        ? TColors.primary
                         : isDarkMode
                         ? Colors.grey[800]
                         : Colors.grey[200],
@@ -333,7 +335,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           if (message.isUser) ...[
             const SizedBox(width: 8.0),
             CircleAvatar(
-              backgroundColor: Colors.teal,
+              backgroundColor: TColors.primary,
               child: const Text('You', style: TextStyle(color: Colors.white, fontSize: 12)),
             ),
           ],
@@ -387,7 +389,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           const SizedBox(width: 8.0),
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: TColors.primary,
               shape: BoxShape.circle,
             ),
             child: IconButton(
