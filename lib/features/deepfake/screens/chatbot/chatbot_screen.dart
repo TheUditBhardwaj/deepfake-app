@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hacachino/utils/constants/colors.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'dart:math' as math;
+import 'dart:ui';
 
 // Running the app without dotenv
 void main() {
@@ -29,7 +30,6 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       home: const ChatbotScreen(),
-
     );
   }
 }
@@ -46,6 +46,146 @@ class ChatMessage {
   }) : timestamp = timestamp ?? DateTime.now();
 }
 
+class AnimatedBackground extends StatefulWidget {
+  final Widget child;
+  final Color color1;
+  final Color color2;
+
+  const AnimatedBackground({
+    super.key,
+    required this.child,
+    required this.color1,
+    required this.color2,
+  });
+
+  @override
+  State<AnimatedBackground> createState() => _AnimatedBackgroundState();
+}
+
+class _AnimatedBackgroundState extends State<AnimatedBackground>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 10),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, _) {
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [widget.color1, widget.color2],
+              transform: GradientRotation(_animationController.value * 2 * math.pi),
+            ),
+          ),
+          child: widget.child,
+        );
+      },
+    );
+  }
+}
+
+class FloatingBubble extends StatefulWidget {
+  final Color color;
+  final double size;
+  final double startY;
+
+  const FloatingBubble({
+    super.key,
+    required this.color,
+    required this.size,
+    required this.startY,
+  });
+
+  @override
+  State<FloatingBubble> createState() => _FloatingBubbleState();
+}
+
+class _FloatingBubbleState extends State<FloatingBubble>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _xAnimation;
+  late Animation<double> _yAnimation;
+  late double startX;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Random starting position
+    startX = math.Random().nextDouble();
+
+    _controller = AnimationController(
+      duration: Duration(seconds: 10 + math.Random().nextInt(20)),
+      vsync: this,
+    );
+
+    // Create random float animations
+    _xAnimation = Tween<double>(
+      begin: startX,
+      end: startX + 0.2 - math.Random().nextDouble() * 0.4,
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _yAnimation = Tween<double>(
+      begin: widget.startY,
+      end: widget.startY - 0.5 - math.Random().nextDouble() * 0.5,
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (_, __) {
+        return Positioned(
+          left: MediaQuery.of(context).size.width * _xAnimation.value,
+          top: MediaQuery.of(context).size.height * _yAnimation.value,
+          child: Opacity(
+            opacity: 0.15,
+            child: Container(
+              height: widget.size,
+              width: widget.size,
+              decoration: BoxDecoration(
+                color: widget.color,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
 
@@ -53,11 +193,15 @@ class ChatbotScreen extends StatefulWidget {
   State<ChatbotScreen> createState() => _ChatbotScreenState();
 }
 
-class _ChatbotScreenState extends State<ChatbotScreen> {
+class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateMixin {
   final TextEditingController _textController = TextEditingController();
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
   bool _isTyping = false;
+
+  // Animation controllers
+  late AnimationController _suggestionsController;
+  bool _showSuggestions = false;
 
   // Directly use the API key
   final String _apiKey = 'AIzaSyCn4_DYFPzofbS0C7lXqtGep5dEnbPqK0g';
@@ -65,14 +209,33 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   // Keep track of conversation to maintain context
   final List<Map<String, String>> _conversationHistory = [];
 
+  // Suggested prompts related to deepfakes
+  final List<String> _deepfakeSuggestions = [
+    "How can I identify deepfake videos?",
+    "What are the risks of deepfake technology?",
+    "How to verify if an image is AI-generated?",
+    "What tools can detect deepfakes?",
+    "How are deepfakes affecting journalism?",
+    "Recent developments in deepfake detection",
+    "How to protect myself from deepfake scams",
+    "What are ethical concerns with deepfakes?",
+    "How are deepfakes used in social media?"
+  ];
+
   @override
   void initState() {
     super.initState();
     // Welcome message
     _messages.add(ChatMessage(
-      text: "Hello! How can I assist you today?",
+      text: "Hello! How can I assist you today? Feel free to ask about deepfakes and digital media verification.",
       isUser: false,
     ));
+
+    // Initialize animations
+    _suggestionsController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
   }
 
   void _handleSubmitted(String text) {
@@ -83,7 +246,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     setState(() {
       _messages.add(ChatMessage(text: text, isUser: true));
       _isTyping = true;
+      _showSuggestions = false;
     });
+    _suggestionsController.reverse();
 
     // Add message to conversation history
     _conversationHistory.add({"role": "user", "content": text});
@@ -93,6 +258,22 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
     // Get response from API
     _getResponseFromApi();
+  }
+
+  void _useSuggestion(String suggestion) {
+    _textController.text = suggestion;
+    _handleSubmitted(suggestion);
+  }
+
+  void _toggleSuggestions() {
+    setState(() {
+      _showSuggestions = !_showSuggestions;
+    });
+    if (_showSuggestions) {
+      _suggestionsController.forward();
+    } else {
+      _suggestionsController.reverse();
+    }
   }
 
   Future<void> _getResponseFromApi() async {
@@ -180,90 +361,175 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     });
   }
 
+  List<Widget> _buildAnimatedBubbles(bool isDarkMode) {
+    final List<Widget> bubbles = [];
+    final baseColor = isDarkMode ? Colors.white : TColors.primary;
+
+    for (int i = 0; i < 10; i++) {
+      bubbles.add(
+        FloatingBubble(
+          color: baseColor.withOpacity(math.Random().nextDouble() * 0.2 + 0.1),
+          size: 20.0 + math.Random().nextDouble() * 80,
+          startY: 0.1 + math.Random().nextDouble() * 0.9,
+        ),
+      );
+    }
+
+    return bubbles;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bgColor1 = isDarkMode ? Colors.grey[900]! : Colors.blue[50]!;
+    final bgColor2 = isDarkMode ? Colors.black : Colors.white;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('AI Assistant', style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        elevation: 2,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                _messages.clear();
-                _conversationHistory.clear();
-                _messages.add(ChatMessage(
-                  text: "Hello! How can I assist you today?",
-                  isUser: false,
-                ));
-              });
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: _messages.isEmpty
-                ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.chat_bubble_outline,
-                    size: 80,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Start a conversation',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            )
-                : ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                return _buildMessage(message, isDarkMode);
+    return AnimatedBackground(
+      color1: bgColor1,
+      color2: bgColor2,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('DeepFake Awareness Assistant',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          centerTitle: true,
+          elevation: 2,
+          backgroundColor: isDarkMode ? Colors.grey[850]!.withOpacity(0.7) : TColors.primary.withOpacity(0.9),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                setState(() {
+                  _messages.clear();
+                  _conversationHistory.clear();
+                  _messages.add(ChatMessage(
+                    text: "Hello! How can I assist you today? Feel free to ask about deepfakes and digital media verification.",
+                    isUser: false,
+                  ));
+                });
               },
             ),
-          ),
-          if (_isTyping)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              alignment: Alignment.centerLeft,
-              child: Row(
-                children: [
-                  const SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Assistant is typing...',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
+          ],
+        ),
+        body: Stack(
+          children: [
+            ..._buildAnimatedBubbles(isDarkMode),
+            Column(
+              children: [
+                Expanded(
+                  child: _messages.isEmpty
+                      ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.chat_bubble_outline,
+                          size: 80,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Start a conversation about deepfakes',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                      : ClipRRect(
+                    child: BackdropFilter(
+                      filter: isDarkMode ?
+                      ImageFilter.blur(sigmaX: 5, sigmaY: 5) :
+                      ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                        itemCount: _messages.length,
+                        itemBuilder: (context, index) {
+                          final message = _messages[index];
+                          return _buildMessage(message, isDarkMode);
+                        },
+                      ),
                     ),
                   ),
-                ],
-              ),
+                ),
+                if (_isTyping)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        const SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Assistant is typing...',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                AnimatedBuilder(
+                  animation: _suggestionsController,
+                  builder: (context, child) {
+                    return SizeTransition(
+                      sizeFactor: _suggestionsController,
+                      child: Container(
+                        height: 60,
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                        decoration: BoxDecoration(
+                          color: isDarkMode
+                              ? Colors.grey[850]!.withOpacity(0.9)
+                              : Colors.white.withOpacity(0.9),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, -2),
+                            ),
+                          ],
+                        ),
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _deepfakeSuggestions.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: ActionChip(
+                                label: Text(
+                                  _deepfakeSuggestions[index],
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: isDarkMode ? Colors.white : Colors.black87,
+                                  ),
+                                ),
+                                backgroundColor: isDarkMode
+                                    ? TColors.primary.withOpacity(0.3)
+                                    : TColors.primary.withOpacity(0.1),
+                                onPressed: () => _useSuggestion(_deepfakeSuggestions[index]),
+                                elevation: 1,
+                                shadowColor: TColors.primary.withOpacity(0.3),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                _buildMessageComposer(isDarkMode),
+              ],
             ),
-          const Divider(height: 1.0),
-          _buildMessageComposer(isDarkMode),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -298,17 +564,17 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                     color: message.isUser
                         ? TColors.primary
                         : isDarkMode
-                        ? Colors.grey[800]
-                        : Colors.grey[200],
+                        ? Colors.grey[800]!.withOpacity(0.9)
+                        : Colors.white.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(20.0).copyWith(
                       bottomRight: message.isUser ? const Radius.circular(0) : null,
                       bottomLeft: !message.isUser ? const Radius.circular(0) : null,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withOpacity(0.1),
                         spreadRadius: 1,
-                        blurRadius: 1,
+                        blurRadius: 3,
                       ),
                     ],
                   ),
@@ -346,12 +612,14 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   Widget _buildMessageComposer(bool isDarkMode) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(
-        color: isDarkMode ? Colors.grey[900] : Colors.white,
+        color: isDarkMode
+            ? Colors.grey[900]!.withOpacity(0.9)
+            : Colors.white.withOpacity(0.9),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 4,
             offset: const Offset(0, -1),
           ),
@@ -359,11 +627,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       ),
       child: Row(
         children: [
+          IconButton(
+            icon: Icon(
+              Icons.lightbulb_outline,
+              color: _showSuggestions ? TColors.primary : Colors.grey,
+            ),
+            onPressed: _toggleSuggestions,
+            tooltip: 'Show suggestions',
+          ),
           Expanded(
             child: TextField(
               controller: _textController,
               decoration: InputDecoration(
-                hintText: 'Type a message...',
+                hintText: 'Ask about deepfakes or media verification...',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24.0),
                   borderSide: BorderSide.none,
@@ -387,10 +663,19 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             ),
           ),
           const SizedBox(width: 8.0),
-          Container(
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
             decoration: BoxDecoration(
               color: TColors.primary,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: TColors.primary.withOpacity(0.4),
+                  spreadRadius: 1,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: IconButton(
               icon: const Icon(Icons.send_rounded),
@@ -409,6 +694,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void dispose() {
     _textController.dispose();
     _scrollController.dispose();
+    _suggestionsController.dispose();
     super.dispose();
   }
 }
+
+// Missing imports that need to be added to this file
