@@ -4,7 +4,7 @@ class TTexts {
 
   // -- OnBoarding Texts
   static const String onBoardingTitle1 = "🔍 Spot the Fake,\n Trust the Real";
-  static const String onBoardingTitle2 = "Discover Your Path to Knowledge";
+  static const String onBoardingTitle2 = "🧠 AI vs AI: The Battle \nBegins";
   static const String onBoardingTitle3 = "Unlock Your Learning Potential";
 
   static const String onBoardingSubTitle1 = "Welcome to a World of Limitless Choices - Your Perfect Product Awaits!";
