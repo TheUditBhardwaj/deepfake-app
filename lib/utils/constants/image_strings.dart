@@ -13,10 +13,10 @@ class TImages {
 
   // -- Lottie Animations
   static String cartAnimation = "assets/images/animations/lady-adding-product-in-cart-animation.json";
-  static String orderCompletedAnimation = "assets/images/animations/order-complete-car-delivery-animation.json";
+  static String orderCompletedAnimation = "assets/images/animations/order-complete-deepfake-delivery-animation.json";
   static String packageAnimation = "assets/images/animations/98783-packaging-in-progress.json";
   static String paperPlaneAnimation = "assets/images/animations/14029-paper-plane.json";
-  static String carAnimation = "assets/images/animations/140629-pencil-car.json";
+  static String carAnimation = "assets/images/animations/140629-pencil-deepfake.json";
   static String successfullyRegisterAnimation = "assets/images/animations/72462-check-register.json";
   static String thankYouAnimation = "assets/images/animations/104368-thank-you.json";
   static String paymentSuccessfulAnimation = "assets/images/animations/120978-payment-successful.json";
@@ -46,7 +46,7 @@ class TImages {
   static const String cosmeticsIcon = 'assets/icons/categories/icons8-cosmetics-64.png';
   static const String animalIcon = 'assets/icons/categories/icons8-dog-heart-64.png';
   static const String nike = 'assets/icons/brands/nike.png';
-  static const String toyIcon = 'assets/icons/categories/icons8-wooden-toy-car-50.png';
+  static const String toyIcon = 'assets/icons/categories/icons8-wooden-toy-deepfake-50.png';
   static const String furnitureIcon = 'assets/icons/categories/icons8-dining-chair-64.png';
   static const String jewelryIcon = 'assets/icons/categories/icons8-sparkling-diamond-64.png';
   static const String electronicsIcon = 'assets/icons/categories/icons8-smartphone-64.png';

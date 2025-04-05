@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hacachino/features/deepfake/screens/home/home.dart';
 import 'package:hacachino/utils/constants/colors.dart';
 import 'package:hacachino/utils/helpers/helper_functions.dart';
 import 'package:iconsax/iconsax.dart';
 
-import 'features/car/screens/home/home.dart';
 import 'features/personalization/screens/settings/settings.dart';
 
 // Root navigation menu with bottom navigation
@@ -59,7 +59,8 @@ class NavigationController extends GetxController {
 
   // List of screens to be displayed based on the selected tab
   final screens = [
-    CarHomeScreen(),  // First screen: CarHomeScreen for "Home"
+    HomeScreen(),
+    // CarHomeScreen(),  // First screen: CarHomeScreen for "Home"
     // TripsScreen(),
     // NotificationsScreen(),
     SettingsScreen(),
