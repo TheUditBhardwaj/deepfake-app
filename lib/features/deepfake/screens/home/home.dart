@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        toolbarHeight: 70,
+        toolbarHeight: 80,
         title: Row(
           children: [
             AnimatedBuilder(
@@ -313,6 +313,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       body: Stack(
         children: [
+
           // Animated background with particles
           Container(
             width: double.infinity,
@@ -342,12 +343,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 100), // Account for extended AppBar
+                  SizedBox(height: 130), // Account for extended AppBar
 
                   // Video upload section with preview and animations
                   _buildVideoUploadSection(),
 
-                  SizedBox(height: 30),
+                  SizedBox(height: 40),
 
                   // Action buttons with animations
                   _buildActionButtons(),
@@ -563,7 +564,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Selected Video',
+                    'Sequence Length',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -602,9 +603,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Expanded(
               child: Slider(
                 value: _sequenceLength.toDouble(),
-                min: 5,
-                max: _maxFrames.toDouble(),
-                divisions: 19,
+                min: 10,
+                max: 100,
+                divisions: 100,
+
                 activeColor: Colors.blue[700],
                 inactiveColor: Colors.grey[800],
                 onChanged: (value) {
@@ -707,16 +709,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         SizedBox(height: 20),
-        Text(
-          'Looking for signs of face manipulation',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey[300],
-          ),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -989,6 +981,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                   color: Colors.grey[400],
                                 ),
                               ),
+                              // SizedBox(height: 4),
+
                             ],
                           ),
                         ),
