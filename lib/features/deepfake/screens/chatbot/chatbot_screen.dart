@@ -604,6 +604,51 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
   Widget _buildMessage(ChatMessage message, bool isDarkMode, int index) {
     final time = "${message.timestamp.hour.toString().padLeft(2, '0')}:${message.timestamp.minute.toString().padLeft(2, '0')}";
 
+    // Function to parse and format text with markdown-like syntax
+    Widget buildRichText(String text) {
+      final List<TextSpan> spans = [];
+
+      // Pattern to match *bold text*
+      final RegExp boldPattern = RegExp(r'\*(.*?)\*');
+
+      String remaining = text;
+      int lastMatchEnd = 0;
+
+      // Find all bold patterns
+      for (final match in boldPattern.allMatches(text)) {
+        // Add text before the match
+        if (match.start > lastMatchEnd) {
+          spans.add(TextSpan(
+            text: remaining.substring(0, match.start - lastMatchEnd),
+          ));
+        }
+
+        // Add the bold text without asterisks
+        spans.add(TextSpan(
+          text: match.group(1),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ));
+
+        // Update remaining text
+        remaining = remaining.substring(match.end - lastMatchEnd);
+        lastMatchEnd = match.end;
+      }
+
+      // Add any remaining text
+      if (remaining.isNotEmpty) {
+        spans.add(TextSpan(text: remaining));
+      }
+
+      return RichText(
+        text: TextSpan(
+          style: TextStyle(
+            color: message.isUser ? Colors.white : (isDarkMode ? Colors.white : Colors.black),
+          ),
+          children: spans,
+        ),
+      );
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -647,14 +692,11 @@ class _ChatbotScreenState extends State<ChatbotScreen> with TickerProviderStateM
                         ),
                       ],
                     ),
-                    child: Text(
-                      message.text,
-                      style: TextStyle(
-                        color: message.isUser ? Colors.white : null,
-                      ),
-                    ),
+                    // Replace Text widget with our custom rich text widget
+                    child: buildRichText(message.text),
                   ),
                 ),
+                // Rest of your code remains the same...
                 Padding(
                   padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
                   child: Row(
