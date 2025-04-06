@@ -17,7 +17,7 @@ class _VideoProcessingScreenState extends State<VideoProcessingScreen> {
   File? _videoFile;
   bool _isLoading = false;
   final DeepfakeService _deepfakeService = DeepfakeService();
-  final int _sequenceLength = 20;
+  final int _sequenceLength = 10;
   String _userName = "Ajay Kumar Dewangan"; // User name from the UI
 
   Future<void> _pickVideo() async {

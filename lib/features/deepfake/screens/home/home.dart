@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
   int _sequenceLength = 10; // Default sequence length
-  int _maxFrames = 100; // Example maximum frame length
+  int _maxFrames = 10; // Example maximum frame length
   String _userName = ''; // To hold the user's name
   bool _isProcessing = false; // Define the _isProcessing variable
 
@@ -61,28 +61,40 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // Method to pick video and start processing
   // Modify the _processVideo method in _HomeScreenState class
+// Add this method to the _HomeScreenState class
+// Update the _processVideo method in the HomeScreen
   Future<void> _processVideo() async {
     if (_pickedVideo == null) {
       print('No video selected');
       return;
     }
 
-    // Navigate to ProcessingScreen immediately
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            ProcessingScreen(
-              prediction: '', // Will be populated later
-              explanationImageUrl: null,
-              details: {}, // Empty details initially
-              explanationImage: null,
-            ),
-      ),
-    );
+    // Show loading indicator
+    setState(() {
+      _isProcessing = true;
+    });
 
-    // The analysis will happen in the background on ProcessingScreen
-    // Or you can create a separate method to handle analysis if needed
+    try {
+      // Navigate to ProcessingScreen with the video file
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProcessingScreen(
+            prediction: '',
+            explanationImageUrl: null,
+            details: {},
+            explanationImage: null,
+            videoFilePath: _pickedVideo!.path,  // Pass the video file path
+            sequenceLength: _sequenceLength,    // Pass the sequence length
+          ),
+        ),
+      );
+    } catch (e) {
+      print('Error processing video: $e');
+      setState(() {
+        _isProcessing = false;
+      });
+    }
   }
 
   // Function to pick a video from gallery

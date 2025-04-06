@@ -62,8 +62,9 @@ class NavigationController extends GetxController {
 
   // List of screens to be displayed based on the selected tab
   final screens = [
-    VideoProcessingScreen(),
+    HomeScreen(),
     ChatbotScreen(),
+    VideoProcessingScreen(),
     // LiveDeepfakeDetectionScreen(),
     SettingsScreen(),
   ];
