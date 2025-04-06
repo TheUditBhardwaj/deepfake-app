@@ -641,7 +641,7 @@ class _ResultsScreenState extends State<ResultsScreen> with SingleTickerProvider
     }
 
     // Default fallback
-    return 0.85;
+    return 0.00;
   }
 }
 

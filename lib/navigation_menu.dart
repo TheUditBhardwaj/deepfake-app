@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hacachino/features/deepfake/models/video_processing.dart';
 import 'package:hacachino/features/deepfake/screens/home/home.dart';
 import 'package:hacachino/utils/constants/colors.dart';
 import 'package:hacachino/utils/helpers/helper_functions.dart';
@@ -63,7 +64,8 @@ class NavigationController extends GetxController {
   final screens = [
     HomeScreen(),
     ChatbotScreen(),
-    LiveDeepfakeDetectionScreen(),
+    // LiveDeepfakeDetectionScreen(),
+    VideoProcessingScreen(),
     SettingsScreen(),
   ];
 }
