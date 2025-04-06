@@ -1,16 +1,41 @@
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
+import 'package:hacachino/features/deepfake/deepfake_results/deepfake_service.dart';
 import 'package:hacachino/features/deepfake/screens/home/widgets/animated_particles.dart';
 import 'package:hacachino/features/deepfake/screens/home/widgets/recent_detections.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/services.dart';
+import 'dart:typed_data'; // This gives you the standard Uint8List
+import 'package:hacachino/features/deepfake/deepfake_results/deepfake_results.dart';
 
 import '../../../../data/repositories/user/user_repository.dart';
 import '../../../authentication/models/user_model.dart';
 import '../output/output_screen.dart';
+
+// Custom painter to render the particles
+class ParticlesPainter extends CustomPainter {
+  final List<AnimatedParticle> particles;
+
+  ParticlesPainter(this.particles);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (var particle in particles) {
+      final paint = Paint()
+        ..color = particle.color
+        ..style = PaintingStyle.fill;
+
+      canvas.drawCircle(particle.position, particle.size, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(ParticlesPainter oldDelegate) => true;
+}
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -24,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _sequenceLength = 10; // Default sequence length
   int _maxFrames = 100; // Example maximum frame length
   String _userName = ''; // To hold the user's name
+  bool _isProcessing = false; // Define the _isProcessing variable
 
   // Animation controllers
   late AnimationController _bgAnimationController;
@@ -33,6 +59,31 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final List<AnimatedParticle> _particles = [];
   final int _particleCount = 20;
 
+  // Method to pick video and start processing
+  // Modify the _processVideo method in _HomeScreenState class
+  Future<void> _processVideo() async {
+    if (_pickedVideo == null) {
+      print('No video selected');
+      return;
+    }
+
+    // Navigate to ProcessingScreen immediately
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ProcessingScreen(
+              prediction: '', // Will be populated later
+              explanationImageUrl: null,
+              details: {}, // Empty details initially
+              explanationImage: null,
+            ),
+      ),
+    );
+
+    // The analysis will happen in the background on ProcessingScreen
+    // Or you can create a separate method to handle analysis if needed
+  }
 
   // Function to pick a video from gallery
   Future<void> _pickVideo() async {
@@ -58,7 +109,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         _videoController?.dispose();
         _videoController = videoController;
         _isVideoInitialized = true;
-        _maxFrames = (videoController.value.duration.inMilliseconds / 33.33).round(); // Approximate frame count at 30fps
+        _maxFrames = (videoController.value.duration.inMilliseconds / 33.33)
+            .round(); // Approximate frame count at 30fps
       });
 
       // Start a spring animation for the video container
@@ -72,7 +124,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       UserModel user = await UserRepository.instance.fetchUserDetails();
       if (mounted) {
         setState(() {
-          _userName = user.fullName ?? 'Guest'; // Fallback to 'Guest' if name is null
+          _userName =
+              user.fullName ?? 'Guest'; // Fallback to 'Guest' if name is null
         });
       }
     } catch (e) {
@@ -146,36 +199,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_videoController != null) {
       if (_videoController!.value.isPlaying) {
         _videoController!.pause();
-
       } else {
         _videoController!.play();
       }
       setState(() {});
     }
-  }
-
-  // Navigate to the next screen (for results)
-  void _navigateToProcessingScreen() {
-    // Play animation before navigating
-    HapticFeedback.mediumImpact();
-
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => ProcessingScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          var begin = Offset(1.0, 0.0);
-          var end = Offset.zero;
-          var curve = Curves.easeInOutCubic;
-          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
-          );
-        },
-        transitionDuration: Duration(milliseconds: 500),
-      ),
-    );
   }
 
   // Update particles position based on animation value
@@ -212,7 +240,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
-                          colors: [Colors.blue.shade700, Colors.purple.shade800],
+                          colors: [
+                            Colors.blue.shade700,
+                            Colors.purple.shade800
+                          ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
@@ -229,7 +260,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         backgroundColor: Color(0xFF212121),
                         radius: 20,
                         child: Text(
-                          _userName.isNotEmpty ? _userName[0].toUpperCase() : 'G',
+                          _userName.isNotEmpty
+                              ? _userName[0].toUpperCase()
+                              : 'G',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -297,7 +330,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       body: Stack(
         children: [
-
           // Animated background with particles
           Container(
             width: double.infinity,
@@ -349,7 +381,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
   }
-
 
 
   Widget _buildVideoUploadSection() {
@@ -434,7 +465,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onPressed: () {
                 _pickVideo();
               },
-              icon: Icon(Icons.video_collection_outlined, color: Colors.black, size: 18),
+              icon: Icon(Icons.video_collection_outlined, color: Colors.black,
+                  size: 18),
               label: Text(
                 'SELECT',
                 style: TextStyle(
@@ -458,7 +490,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           SizedBox(width: 16),
           Expanded(
             child: ElevatedButton.icon(
-              onPressed: _pickedVideo != null ? _navigateToProcessingScreen : null,
+              onPressed: _pickedVideo != null
+                  ? _processVideo  // Changed from _navigateToProcessingScreen to _processVideo
+                  : null,
               icon: Icon(Icons.arrow_forward, size: 18),
               label: Text(
                 'ANALYZE',
@@ -489,7 +523,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-// Add these methods inside the _HomeScreenState class
   Widget _buildVideoPreview() {
     return Column(
       children: [
@@ -557,7 +590,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                   SizedBox(height: 4),
                   Text(
-                    '${(_videoController!.value.duration.inSeconds / 60).floor()}:${(_videoController!.value.duration.inSeconds % 60).toString().padLeft(2, '0')} minutes',
+                    '${(_videoController!.value.duration.inSeconds / 60)
+                        .floor()}:${(_videoController!.value.duration
+                        .inSeconds % 60).toString().padLeft(2, '0')} minutes',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[400],
@@ -589,8 +624,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 value: _sequenceLength.toDouble(),
                 min: 10,
                 max: 100,
-                divisions: 100,
-
+                divisions: 90,  // Fixed to match range
                 activeColor: Colors.blue[700],
                 inactiveColor: Colors.grey[800],
                 onChanged: (value) {
@@ -693,42 +727,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
         SizedBox(height: 20),
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.start,
-        //   children: [
-        //     // _buildFeatureTag('Facial movements'),
-        //     SizedBox(width: 5),
-        //     // _buildFeatureTag('Audio sync'),
-        //     SizedBox(width: 5),
-        //     // _buildFeatureTag('Artifacts'),
-        //   ],
-        // ),
       ],
     );
   }
-
-  // Widget _buildFeatureTag(String text) {
-  //   return Container(
-  //     padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-  //     decoration: BoxDecoration(
-  //       color: Colors.white.withOpacity(0.05),
-  //       borderRadius: BorderRadius.circular(12),
-  //       border: Border.all(
-  //         color: Colors.white.withOpacity(0.1),
-  //         width: 1,
-  //       ),
-  //     ),
-  //     child: Text(
-  //       text,
-  //       style: TextStyle(
-  //         fontSize: 12,
-  //         color: Colors.grey[300],
-  //       ),
-  //     ),
-  //   );
-  // }
-
 }
-
-
-
