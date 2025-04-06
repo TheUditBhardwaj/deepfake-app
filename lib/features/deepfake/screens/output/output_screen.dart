@@ -32,7 +32,7 @@ class _ProcessingScreenState extends State<ProcessingScreen> {
     super.initState();
 
     // Wait for 5 seconds (or animation time) before navigating to ResultsScreen
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(Duration(seconds: 7), () {
       _navigateToResultsScreen();
     });
   }

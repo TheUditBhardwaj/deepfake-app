@@ -52,9 +52,7 @@ class _VideoProcessingScreenState extends State<VideoProcessingScreen> {
     });
 
     try {
-      final result = await _deepfakeService.analyzeVideo(_videoFile!,
-
-      );
+      final result = await _deepfakeService.analyzeVideo(_videoFile!, );
 
       if (!mounted) return;
 
