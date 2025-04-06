@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:typed_data';
 
 class DeepfakeService {
-  static const String baseUrl = 'https://4138ff78a4df064f38.gradio.live/api/predict';
+  static const String baseUrl = 'https://4138ff78a4df064f38.gradio.live/';
 
   Future<DeepfakeResult> analyzeVideo(File videoFile, {int sequenceLength = 32}) async {
     try {
