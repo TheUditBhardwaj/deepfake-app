@@ -352,24 +352,7 @@ class _VideoProcessingScreenState extends State<VideoProcessingScreen> {
             ),
 
             // Bottom navigation
-            Container(
-              height: 72,
-              decoration: BoxDecoration(
-                color: Color(0xFF14161D),
-                border: Border(
-                  top: BorderSide(color: Colors.grey[900]!, width: 1),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildNavItem(Icons.home, 'Home', true),
-                  _buildNavItem(Icons.radar, 'Chat bot', false),
-                  _buildNavItem(Icons.camera_alt, 'Live', false),
-                  _buildNavItem(Icons.settings, 'Settings', false),
-                ],
-              ),
-            ),
+
           ],
         ),
       ),
